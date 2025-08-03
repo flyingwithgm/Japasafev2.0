@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | JapaSafe</title>
+  <link href="/css/dashboard.css" rel="stylesheet">
+</head>
+<body>
+  <div class="dashboard-layout">
+    <aside class="sidebar">
+      <img src="/assets/images/logo.svg" alt="JapaSafe" class="logo">
+      <div class="user-profile">
+        <img id="userAvatar" src="/assets/images/default-avatar.jpg" alt="Profile">
+        <span id="userName"></span>
+      </div>
+      <nav>
+        <a href="/dashboard.html" class="active"><i class="icon home"></i> Dashboard</a>
+        <a href="/documents.html"><i class="icon documents"></i> Documents</a>
+        <a href="/practice.html"><i class="icon practice"></i> Practice</a>
+        <a href="/profile.html"><i class="icon profile"></i> Profile</a>
+        <button id="logoutBtn" class="logout"><i class="icon logout"></i> Logout</button>
+      </nav>
+    </aside>
+    <main class="main-content">
+      <h1>Welcome back, <span id="greetingName"></span>!</h1>
+      <div class="stats">
+        <div class="stat-card">
+          <h3>Documents</h3>
+          <p id="docCount">0</p>
+        </div>
+        <div class="stat-card">
+          <h3>Practice Sessions</h3>
+          <p id="practiceCount">0</p>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script type="module">
+    import { getProfile } from '/js/data/profile.js';
+    import { getUserDocuments } from '/js/data/documents.js';
+    import { getAllRecordings } from '/js/data/recordings.js';
+    import { logout } from '/js/auth/auth.js';
+    
+    // Load user data
+    async function loadDashboard() {
+      const profile = await getProfile();
+      document.getElementById('userName').textContent = profile.displayName;
+      document.getElementById('greetingName').textContent = profile.displayName;
+      
+      if (profile.photoBase64) {
+        document.getElementById('userAvatar').src = `data:image/jpeg;base64,${profile.photoBase64}`;
+      }
+      
+      const docs = await getUserDocuments();
+      document.getElementById('docCount').textContent = docs.length;
+      
+      const recordings = await getAllRecordings();
+      document.getElementById('practiceCount').textContent = recordings.length;
+    }
+    
+    document.getElementById('logoutBtn').addEventListener('click', logout);
+    loadDashboard();
+  </script>
+</body>
+</html>
