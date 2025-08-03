@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Documents | JapaSafe</title>
+  <link href="/css/documents.css" rel="stylesheet">
+</head>
+<body>
+  <div class="dashboard-layout">
+    <!-- Same sidebar as dashboard.html -->
+    <main class="main-content">
+      <h1>Your Documents</h1>
+      <div class="upload-area" id="dropZone">
+        <input type="file" id="fileInput" accept=".pdf,.jpg,.jpeg,.png">
+        <p>Drag & drop files here or click to browse</p>
+      </div>
+      <div class="document-list" id="documentList">
+        <!-- Documents will be loaded here -->
+      </div>
+    </main>
+  </div>
+  <script type="module">
+    import { uploadDocument, getUserDocuments, deleteDocument } from '/js/data/documents.js';
+    
+    const fileInput = document.getElementById('fileInput');
+    const dropZone = document.getElementById('dropZone');
+    const documentList = document.getElementById('documentList');
+    
+    // Handle file selection
+    fileInput.addEventListener('change', async (e) => {
+      if (e.target.files.length > 0) {
+        await uploadDocument(e.target.files[0]);
+        renderDocuments();
+      }
+    });
+    
+    // Handle drag and drop
+    dropZone.addEventListener('click', () => fileInput.click());
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+    dropZone.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length > 0) {
+        await uploadDocument(e.dataTransfer.files[0]);
+        renderDocuments();
+      }
+    });
+    
+    // Render documents list
+    async function renderDocuments() {
+      const docs = await getUserDocuments();
+      documentList.innerHTML = '';
+      
+      docs.forEach(doc => {
+        const docElement = document.createElement('div');
+        docElement.className = 'document-card';
+        docElement.innerHTML = `
+          <div class="document-preview">
+            ${doc.type.includes('image') ? 
+              `<img src="${doc.url}" alt="${doc.name}">` : 
+              `<iframe src="${doc.url}"></iframe>`}
+          </div>
+          <div class="document-info">
+            <h3>${doc.name}</h3>
+            <p>${new Date(doc.uploadedAt).toLocaleDateString()}</p>
+            <button class="btn delete" data-id="${doc.id}">Delete</button>
+          </div>
+        `;
+        documentList.appendChild(docElement);
+      });
+      
+      // Add delete handlers
+      document.querySelectorAll('.delete').forEach(btn => {
+        btn.addEventListener('click', async (e) => {
+          if (confirm('Are you sure you want to delete this document?')) {
+            await deleteDocument(e.target.dataset.id);
+            renderDocuments();
+          }
+        });
+      });
+    }
+    
+    renderDocuments();
+  </script>
+</body>
+</html>
