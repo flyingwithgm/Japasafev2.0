@@ -1,0 +1,45 @@
+.practice-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.question-panel {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.question-panel h2 {
+  margin-top: 0;
+}
+
+.timer {
+  font-size: 24px;
+  font-weight: bold;
+  color: var(--primary);
+  margin-top: 20px;
+  text-align: center;
+}
+
+.recording-panel {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.recording-panel video {
+  width: 100%;
+  background: #000;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
