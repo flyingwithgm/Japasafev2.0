@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Practice | JapaSafe</title>
+  <link href="/css/practice.css" rel="stylesheet">
+</head>
+<body>
+  <div class="dashboard-layout">
+    <!-- Same sidebar as dashboard.html -->
+    <main class="main-content">
+      <h1>Practice Interview</h1>
+      <div class="practice-container">
+        <div class="question-panel">
+          <h2 id="questionText">Why do you want to study abroad?</h2>
+          <div class="timer">
+            <span id="countdown">02:00</span>
+          </div>
+        </div>
+        <div class="recording-panel">
+          <video id="videoPreview" autoplay muted></video>
+          <video id="playback" controls style="display:none"></video>
+          <div class="controls">
+            <button id="startBtn" class="btn primary">Start Recording</button>
+            <button id="stopBtn" class="btn danger" disabled>Stop</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script type="module">
+    import { saveRecording } from '/js/data/recordings.js';
+    
+    const questions = [
+      "Why do you want to study abroad?",
+      "Why did you choose this university?",
+      "How will you fund your education?"
+    ];
+    
+    let mediaRecorder;
+    let recordedChunks = [];
+    let currentQuestion = 0;
+    
+    // Initialize video
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      .then(stream => {
+        document.getElementById('videoPreview').srcObject = stream;
+        mediaRecorder = new MediaRecorder(stream);
+        
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) recordedChunks.push(e.data);
+        };
+        
+        mediaRecorder.onstop = async () => {
+          const blob = new Blob(recordedChunks, { type: 'video/webm' });
+          await saveRecording(blob);
+          document.getElementById('playback').src = URL.createObjectURL(blob);
+          document.getElementById('videoPreview').style.display = 'none';
+          document.getElementById('playback').style.display = 'block';
+          recordedChunks = [];
+        };
+      });
+    
+    // Control buttons
+    document.getElementById('startBtn').addEventListener('click', () => {
+      mediaRecorder.start();
+      document.getElementById('startBtn').disabled = true;
+      document.getElementById('stopBtn').disabled = false;
+      startTimer();
+    });
+    
+    document.getElementById('stopBtn').addEventListener('click', () => {
+      mediaRecorder.stop();
+      document.getElementById('startBtn').disabled = false;
+      document.getElementById('stopBtn').disabled = true;
+      clearInterval(timerInterval);
+    });
+    
+    // Timer logic
+    let timeLeft = 120;
+    let timerInterval;
+    
+    function startTimer() {
+      timeLeft = 120;
+      updateTimer();
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimer();
+        if (timeLeft <= 0) {
+          mediaRecorder.stop();
+          clearInterval(timerInterval);
+        }
+      }, 1000);
+    }
+    
+    function updateTimer() {
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      document.getElementById('countdown').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    }
+  </script>
+</body>
+</html>
