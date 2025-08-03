@@ -1,0 +1,10 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "documents",
+      "fields": [
+        { "fieldPath": "uploadedAt", "order": "DESCENDING" }
+      ]
+    }
+  ]
+}
